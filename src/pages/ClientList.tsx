@@ -38,20 +38,22 @@ export default function ClientList() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<SortField>("updated_at");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10); // Number of items per page
 
-  const { data: clients, isLoading } = useQuery({
-    queryKey: ["clients", search, sortBy],
+  // Fetch the clients
+  const { data: clients, isLoading, error } = useQuery({
+    queryKey: ["clients", search, sortBy, currentPage],
     queryFn: async () => {
       let query = supabase
         .from("clients")
-        .select("*");
+        .select("*")
+        .ilike("name", `%${search}%`)
+        .or(`email.ilike.%${search}%,company.ilike.%${search}%`);
 
-      if (search) {
-        query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,company.ilike.%${search}%`);
-      }
+      query = query.order(sortBy, { ascending: sortBy !== "updated_at" });
 
-      const { data, error } = await query.order(sortBy, { ascending: sortBy !== "updated_at" });
-
+      const { data, error } = await query.range((currentPage - 1) * pageSize, currentPage * pageSize - 1); // Pagination logic
       if (error) throw error;
       return data;
     },
@@ -75,6 +77,10 @@ export default function ClientList() {
         description: "Client deleted successfully",
       });
     }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
   };
 
   return (
@@ -114,10 +120,10 @@ export default function ClientList() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Client Name</TableHead>
+              <TableHead>Full Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Company</TableHead>
               <TableHead>AI Agent Name</TableHead>
-              <TableHead>Google Drive Links</TableHead>
-              <TableHead>Website URLs</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Last Updated</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -130,64 +136,44 @@ export default function ClientList() {
                   Loading...
                 </TableCell>
               </TableRow>
-            ) : clients?.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
-                  No clients found
-                </TableCell>
-              </TableRow>
             ) : (
-              clients.map((client) => (
+              clients?.map((client) => (
                 <TableRow key={client.id}>
-                  <TableCell>{client.name}</TableCell>
+                  <TableCell>{client.full_name}</TableCell>
+                  <TableCell>{client.email}</TableCell>
+                  <TableCell>{client.company}</TableCell>
                   <TableCell>{client.agent_name}</TableCell>
                   <TableCell>
-                    {client.google_drive_links?.length > 0 ? (
-                      <ul>
-                        {client.google_drive_links.map((link: string, index: number) => (
-                          <li key={index}>
-                            <a href={link} target="_blank" rel="noopener noreferrer" className="text-blue-600">
-                              {link}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p>No links</p>
-                    )}
+                    <Badge variant={client.status === "active" ? "success" : "destructive"}>
+                      {client.status}
+                    </Badge>
                   </TableCell>
-                  <TableCell>
-                    {client.website_urls?.length > 0 ? (
-                      <ul>
-                        {client.website_urls.map((url: string, index: number) => (
-                          <li key={index}>
-                            <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600">
-                              {url}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p>No URLs</p>
-                    )}
-                  </TableCell>
-                  <TableCell>{client.status}</TableCell>
-                  <TableCell>
-                    {formatDistanceToNow(new Date(client.updated_at), { addSuffix: true })}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Link to={`/clients/edit/${client.id}`} className="mr-2 text-yellow-500">
-                      <Edit className="h-4 w-4" />
+                  <TableCell>{formatDistanceToNow(new Date(client.updated_at))} ago</TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <Link to={`/clients/view/${client.id}`}>
+                      <Eye className="text-blue-500 cursor-pointer" />
                     </Link>
-                    <button onClick={() => handleDelete(client.id)} className="text-red-500">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <Link to={`/clients/edit/${client.id}`}>
+                      <Edit className="text-yellow-500 cursor-pointer" />
+                    </Link>
+                    <Settings className="text-gray-500 cursor-pointer" />
+                    <Trash2
+                      className="text-red-500 cursor-pointer"
+                      onClick={() => handleDelete(client.id)}
+                    />
                   </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
+      </div>
+
+      <div className="flex justify-between items-center mt-4">
+        <Button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+          Previous
+        </Button>
+        <Button onClick={() => handlePageChange(currentPage + 1)}>Next</Button>
       </div>
     </div>
   );
