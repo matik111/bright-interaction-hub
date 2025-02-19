@@ -161,7 +161,7 @@ export default function AddClient() {
               <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Textarea
                 className="pl-10"
-                placeholder="Brief description"
+                placeholder="Client Description"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, description: e.target.value }))
@@ -171,7 +171,15 @@ export default function AddClient() {
           </div>
         </div>
 
-        <Button type="submit" className="w-full">Save Client</Button>
+        <div className="flex justify-end space-x-4">
+          <Button
+            type="submit"
+            className="bg-blue-500 text-white"
+            disabled={addClientMutation.isLoading}
+          >
+            {addClientMutation.isLoading ? "Adding..." : "Add Client"}
+          </Button>
+        </div>
       </form>
     </div>
   );
