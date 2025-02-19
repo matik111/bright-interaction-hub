@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { 
@@ -174,7 +173,7 @@ export default function ClientList() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => navigate(`/clients/${client.id}/edit`)}
+                        onClick={() => navigate(`/clients/edit/${client.id}`)} // Update this line for the edit functionality
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
