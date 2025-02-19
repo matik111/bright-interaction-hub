@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, User, Mail, Building, Globe, Bot, FileText } from "lucide-react";
+import { ArrowLeft, User, Mail, Building, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -58,6 +58,7 @@ export default function AddClient() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
+      {/* Back Button */}
       <Button
         variant="ghost"
         className="mb-6"
@@ -66,120 +67,111 @@ export default function AddClient() {
         <ArrowLeft className="mr-2 h-4 w-4" /> Back to Clients
       </Button>
 
+      {/* Page Title */}
       <h1 className="text-3xl font-bold mb-8">Add New Client</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-4">
-          {/* Full Name Field */}
-          <div>
-            <label className="text-sm font-medium leading-none">Full Name</label>
-            <div className="relative">
-              <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                required
-                className="pl-10"
-                placeholder="John Doe"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, name: e.target.value }))
-                }
-              />
-            </div>
-          </div>
-
-          {/* Email Field */}
-          <div>
-            <label className="text-sm font-medium leading-none">Email</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                required
-                type="email"
-                className="pl-10"
-                placeholder="john@example.com"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, email: e.target.value }))
-                }
-              />
-            </div>
-          </div>
-
-          {/* Company Field */}
-          <div>
-            <label className="text-sm font-medium leading-none">Company</label>
-            <div className="relative">
-              <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                className="pl-10"
-                placeholder="Company Name"
-                value={formData.company}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, company: e.target.value }))
-                }
-              />
-            </div>
-          </div>
-
-          {/* Website Field */}
-          <div>
-            <label className="text-sm font-medium leading-none">Website</label>
-            <div className="relative">
-              <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="url"
-                className="pl-10"
-                placeholder="https://example.com"
-                value={formData.website}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, website: e.target.value }))
-                }
-              />
-            </div>
-          </div>
-
-          {/* AI Agent Name Field */}
-          <div>
-            <label className="text-sm font-medium leading-none">AI Agent Name</label>
-            <div className="relative">
-              <Bot className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                className="pl-10"
-                placeholder="AI Agent Name"
-                value={formData.agent_name}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, agent_name: e.target.value }))
-                }
-              />
-            </div>
-          </div>
-
-          {/* Description Field */}
-          <div>
-            <label className="text-sm font-medium leading-none">Description</label>
-            <div className="relative">
-              <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Textarea
-                className="pl-10"
-                placeholder="Client Description"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, description: e.target.value }))
-                }
-              />
-            </div>
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg space-y-6">
+        {/* Full Name */}
+        <div>
+          <label className="text-sm font-medium leading-none">Full Name</label>
+          <div className="relative">
+            <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              required
+              className="pl-10"
+              placeholder="John Doe"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, name: e.target.value }))
+              }
+            />
           </div>
         </div>
 
-        <div className="flex justify-end space-x-4">
-          <Button
-            type="submit"
-            className="bg-blue-500 text-white"
-            disabled={addClientMutation.isLoading}
-          >
-            {addClientMutation.isLoading ? "Adding..." : "Add Client"}
-          </Button>
+        {/* Email */}
+        <div>
+          <label className="text-sm font-medium leading-none">Email</label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              required
+              type="email"
+              className="pl-10"
+              placeholder="john@example.com"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, email: e.target.value }))
+              }
+            />
+          </div>
         </div>
+
+        {/* Company */}
+        <div>
+          <label className="text-sm font-medium leading-none">Company</label>
+          <div className="relative">
+            <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              className="pl-10"
+              placeholder="Company Name"
+              value={formData.company}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, company: e.target.value }))
+              }
+            />
+          </div>
+        </div>
+
+        {/* Website */}
+        <div>
+          <label className="text-sm font-medium leading-none">Website</label>
+          <div className="relative">
+            <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="url"
+              className="pl-10"
+              placeholder="https://example.com"
+              value={formData.website}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, website: e.target.value }))
+              }
+            />
+          </div>
+        </div>
+
+        {/* AI Agent Name */}
+        <div>
+          <label className="text-sm font-medium leading-none">AI Agent Name</label>
+          <div className="relative">
+            <Bot className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              required
+              className="pl-10"
+              placeholder="AI Chatbot"
+              value={formData.agent_name}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, agent_name: e.target.value }))
+              }
+            />
+          </div>
+        </div>
+
+        {/* Description */}
+        <div>
+          <label className="text-sm font-medium leading-none">Description</label>
+          <Textarea
+            className="resize-none"
+            placeholder="Add a brief description"
+            value={formData.description}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, description: e.target.value }))
+            }
+          />
+        </div>
+
+        {/* Submit Button */}
+        <Button type="submit" className="w-full mt-6">Add Client</Button>
       </form>
     </div>
   );
