@@ -144,9 +144,8 @@ export default function AddClient() {
             <div className="relative">
               <Bot className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                required
                 className="pl-10"
-                placeholder="Assistant Name"
+                placeholder="AI Agent Name"
                 value={formData.agent_name}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, agent_name: e.target.value }))
@@ -161,8 +160,8 @@ export default function AddClient() {
             <div className="relative">
               <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Textarea
-                className="min-h-[100px] pl-10"
-                placeholder="Additional details about the client..."
+                className="pl-10"
+                placeholder="Describe the client"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, description: e.target.value }))
@@ -172,18 +171,7 @@ export default function AddClient() {
           </div>
         </div>
 
-        <div className="flex justify-end gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate("/clients")}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={addClientMutation.isLoading}>
-            {addClientMutation.isLoading ? "Adding..." : "Add Client"}
-          </Button>
-        </div>
+        <Button type="submit" className="w-full">Save Client</Button>
       </form>
     </div>
   );
