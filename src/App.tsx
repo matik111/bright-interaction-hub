@@ -7,7 +7,6 @@ import ClientList from "./pages/ClientList";
 import AddEditClient from "./pages/AddEditClient";
 import ViewClient from "./pages/ViewClient";
 import NotFound from "./pages/NotFound";
-import AiChatbotAdmin from "./pages/AiChatbotAdmin"; // Correct import
 import { Button } from "@/components/ui/button";
 import "./App.css";
 
@@ -39,9 +38,7 @@ function App() {
       <Router>
         <ErrorBoundary>
           <div className="global-nav" style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 1000 }}>
-            <Link to="/ai-chatbot-admin"> {/* Correct Link */}
-              <Button>Go to AI Chatbot Admin System</Button>
-            </Link>
+            {/* Removed Link to ai-chatbot-admin */}
           </div>
 
           <Routes>
@@ -50,7 +47,6 @@ function App() {
             <Route path="/clients/add" element={<AddEditClient />} />
             <Route path="/clients/edit/:id" element={<AddEditClient />} />
             <Route path="/clients/:id" element={<ViewClient />} />
-            <Route path="/ai-chatbot-admin" element={<AiChatbotAdmin />} /> {/* Correct Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </ErrorBoundary>
