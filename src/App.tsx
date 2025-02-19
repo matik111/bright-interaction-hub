@@ -12,7 +12,8 @@ const queryClient = new QueryClient();
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}> {/* Ensure the entire app is wrapped */}
+    // QueryClientProvider should wrap the Router and Routes
+    <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
           <Route path="/" element={<Index />} />
@@ -23,7 +24,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
-    </QueryClientProvider> // Fix: Removed comment within JSX
+    </QueryClientProvider>
   );
 }
 
