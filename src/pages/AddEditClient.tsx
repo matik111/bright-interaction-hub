@@ -20,7 +20,7 @@ const AddEditClient = () => {
   const [website, setWebsite] = useState("");
   const [agentName, setAgentName] = useState("");
   const [description, setDescription] = useState("");
-  const [googleDriveLinksAddedAt, setGoogleDriveLinksAddedAt] = useState<string[]>([]); // Updated to handle the timestamps
+  const [googleDriveLinksAddedAt, setGoogleDriveLinksAddedAt] = useState<string[]>([]);
   const [websiteUrls, setWebsiteUrls] = useState<string[]>([]);
 
   // Fetch client data if editing
@@ -39,19 +39,21 @@ const AddEditClient = () => {
     },
     enabled: !!id,
     onSuccess: (data) => {
-      setClientName(data.name);
-      setFullName(data.full_name || "");
-      setEmail(data.email || "");
-      setCompany(data.company || "");
-      setWebsite(data.website || "");
-      setAgentName(data.agent_name || "");
-      setDescription(data.description || "");
-      setGoogleDriveLinksAddedAt(data.google_drive_links_added_at || []); // Assigning the timestamp data
-      setWebsiteUrls(data.website_urls || []);
+      if (data) {
+        setClientName(data.name || "");
+        setFullName(data.full_name || "");
+        setEmail(data.email || "");
+        setCompany(data.company || "");
+        setWebsite(data.website || "");
+        setAgentName(data.agent_name || "");
+        setDescription(data.description || "");
+        setGoogleDriveLinksAddedAt(data.google_drive_links_added_at || []);
+        setWebsiteUrls(data.website_urls || []);
+      }
     },
   });
 
-  // Mutation for saving the client data
+  // Mutation for saving the client data (adding or editing)
   const saveClientMutation = useMutation({
     mutationFn: async () => {
       const payload = {
@@ -64,23 +66,31 @@ const AddEditClient = () => {
         description: description,
         google_drive_links_added_at: googleDriveLinksAddedAt, // Saving the timestamp
         website_urls: websiteUrls,
-        updated_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(), // Always update the `updated_at` field
       };
-      const { data, error } = await supabase.from("clients").upsert(payload);
+
+      // Only add created_at on a new client (if id does not exist)
+      if (!id) {
+        payload["created_at"] = new Date().toISOString();
+      }
+
+      // Perform upsert operation, updating or inserting data based on client ID
+      const { data, error } = await supabase.from("clients").upsert(payload, { onConflict: ['id'] });
       if (error) throw error;
       return data;
     },
     onSuccess: () => {
-      navigate("/clients");
+      navigate("/clients"); // Redirect to client list page after saving
     },
   });
 
+  // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     saveClientMutation.mutate();
   };
 
-  // Function to delete a Google Drive link or website URL
+  // Handle delete link (Google Drive or Website URLs)
   const handleDeleteLink = (url: string, type: 'google' | 'website') => {
     if (type === 'google') {
       setGoogleDriveLinksAddedAt(googleDriveLinksAddedAt.filter(link => link !== url));
@@ -94,11 +104,11 @@ const AddEditClient = () => {
       <div className="sidebar"> {/* Sidebar for consistency with dashboard */} </div>
 
       <div className="main-content">
-        <h1 className="page-title">Edit Client</h1>
+        <h1 className="page-title">{id ? "Edit Client" : "Add New Client"}</h1>
 
         <Card className="form-card">
           <CardHeader>
-            <h2>Edit Client Information</h2>
+            <h2>{id ? "Edit Client Information" : "Add Client Information"}</h2>
           </CardHeader>
 
           <CardBody>
@@ -123,6 +133,7 @@ const AddEditClient = () => {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Enter full name"
+                  required
                 />
               </FormItem>
 
@@ -134,6 +145,7 @@ const AddEditClient = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter email"
+                  required
                 />
               </FormItem>
 
@@ -159,14 +171,14 @@ const AddEditClient = () => {
                 />
               </FormItem>
 
-              {/* Agent Name */}
+              {/* AI Agent Name */}
               <FormItem>
-                <FormLabel>Agent Name</FormLabel>
+                <FormLabel>AI Agent Name</FormLabel>
                 <Input
                   type="text"
                   value={agentName}
                   onChange={(e) => setAgentName(e.target.value)}
-                  placeholder="Enter agent name"
+                  placeholder="Enter AI Agent Name"
                 />
               </FormItem>
 
@@ -180,28 +192,10 @@ const AddEditClient = () => {
                 />
               </FormItem>
 
-              {/* Google Drive Links Added At */}
-              <FormItem>
-                <FormLabel>Google Drive Links Added At</FormLabel>
-                <Textarea
-                  value={googleDriveLinksAddedAt.join(", ")} // Display timestamp list
-                  onChange={(e) => setGoogleDriveLinksAddedAt(e.target.value.split(", "))}
-                  placeholder="Enter Google Drive links timestamps"
-                />
-              </FormItem>
-
-              {/* Website URLs */}
-              <FormItem>
-                <FormLabel>Website URLs</FormLabel>
-                <Textarea
-                  value={websiteUrls.join(", ")} // Display website URLs list
-                  onChange={(e) => setWebsiteUrls(e.target.value.split(", "))}
-                  placeholder="Enter website URLs"
-                />
-              </FormItem>
-
-              {/* Save Button */}
-              <Button type="submit">Save Client</Button>
+              {/* Submit Button */}
+              <Button type="submit">
+                {id ? "Save Changes" : "Add Client"}
+              </Button>
             </Form>
           </CardBody>
         </Card>
