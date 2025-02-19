@@ -1,4 +1,6 @@
+
 import { Users, MessagesSquare, Activity, Plus, List } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { StatCard } from "@/components/metrics/StatCard";
 import { ActivityItem } from "@/components/activity/ActivityItem";
 import { Button } from "@/components/ui/button";
@@ -33,18 +35,23 @@ const recentActivity = [
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl animate-in">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">AI Chatbot Admin System</h1>
         <div className="flex gap-4">
-          <Button className="shadow-sm">
+          <Button 
+            className="shadow-sm"
+            onClick={() => navigate("/clients/add")}
+          >
             <Plus className="mr-2 h-4 w-4" /> Add New Client
           </Button>
           <Button 
             variant="outline" 
             className="shadow-sm"
-            onClick={() => window.location.href = '/clients'}
+            onClick={() => navigate("/clients")}
           >
             <List className="mr-2 h-4 w-4" /> View Client List
           </Button>

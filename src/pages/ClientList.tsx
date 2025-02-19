@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { 
@@ -30,10 +29,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "@/components/ui/use-toast";
 
 type SortField = "name" | "agent_name" | "status" | "updated_at";
 
 export default function ClientList() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<SortField>("updated_at");
 
@@ -55,11 +57,31 @@ export default function ClientList() {
     },
   });
 
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase
+      .from("clients")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete client",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Client deleted successfully",
+      });
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">Client Management</h1>
-        <Button>
+        <Button onClick={() => navigate("/clients/add")}>
           <Plus className="mr-2 h-4 w-4" /> Add New Client
         </Button>
       </div>
@@ -138,16 +160,29 @@ export default function ClientList() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigate(`/clients/${client.id}`)}
+                      >
                         <Eye className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="icon">
                         <Settings className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigate(`/clients/${client.id}/edit`)}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="text-destructive">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive"
+                        onClick={() => handleDelete(client.id)}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
