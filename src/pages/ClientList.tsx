@@ -137,51 +137,51 @@ export default function ClientList() {
                 </TableCell>
               </TableRow>
             ) : (
-              clients?.map((client) => (
+              clients.map((client) => (
                 <TableRow key={client.id}>
-                  <TableCell>
-                    <Link to={`/clients/${client.id}`} className="text-blue-500 hover:underline">
-                      {client.name}
-                    </Link>
-                  </TableCell>
+                  <TableCell>{client.name}</TableCell>
                   <TableCell>{client.agent_name}</TableCell>
                   <TableCell>
                     {client.google_drive_links?.length > 0 ? (
                       <ul>
-                        {client.google_drive_links.map((link, index) => (
-                          <li key={index}>{link}</li>
+                        {client.google_drive_links.map((link: string, index: number) => (
+                          <li key={index}>
+                            <a href={link} target="_blank" rel="noopener noreferrer" className="text-blue-600">
+                              {link}
+                            </a>
+                          </li>
                         ))}
                       </ul>
                     ) : (
-                      <span>No links available</span>
+                      <p>No links</p>
                     )}
                   </TableCell>
                   <TableCell>
                     {client.website_urls?.length > 0 ? (
                       <ul>
-                        {client.website_urls.map((url, index) => (
-                          <li key={index}>{url}</li>
+                        {client.website_urls.map((url: string, index: number) => (
+                          <li key={index}>
+                            <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600">
+                              {url}
+                            </a>
+                          </li>
                         ))}
                       </ul>
                     ) : (
-                      <span>No URLs available</span>
+                      <p>No URLs</p>
                     )}
                   </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="text-muted-foreground">
-                      Active
-                    </Badge>
-                  </TableCell>
+                  <TableCell>{client.status}</TableCell>
                   <TableCell>
                     {formatDistanceToNow(new Date(client.updated_at), { addSuffix: true })}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" onClick={() => navigate(`/clients/edit/${client.id}`)}>
+                    <Link to={`/clients/edit/${client.id}`} className="mr-2 text-yellow-500">
                       <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" onClick={() => handleDelete(client.id)}>
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
+                    </Link>
+                    <button onClick={() => handleDelete(client.id)} className="text-red-500">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </TableCell>
                 </TableRow>
               ))
