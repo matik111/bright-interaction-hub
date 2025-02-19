@@ -1,137 +1,190 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-export default function AddEditClient() {
+const AddEditClient = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const { id } = useParams(); // For editing an existing client
-  const isEditMode = Boolean(id);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    agent_name: "",
-    googleDriveLinks: [],
-    websiteUrls: [],
-  });
+  const [clientName, setClientName] = useState("");
+  const [agentName, setAgentName] = useState("");
+  const [googleDriveLinks, setGoogleDriveLinks] = useState<string[]>([]);
+  const [websiteUrls, setWebsiteUrls] = useState<string[]>([]);
 
-  useEffect(() => {
-    if (isEditMode) {
-      const fetchClient = async () => {
-        const { data: client } = await supabase
-          .from("clients")
-          .select()
-          .eq("id", id)
-          .single();
-        if (client) {
-          setFormData({
-            name: client.name,
-            agent_name: client.agent_name,
-            googleDriveLinks: client.google_drive_links || [],
-            websiteUrls: client.website_urls || [],
-          });
-        }
-      };
-      fetchClient();
-    }
-  }, [id, isEditMode]);
-
-  const addOrUpdateClientMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
-      if (isEditMode) {
-        const { data: updatedClient, error } = await supabase
-          .from("clients")
-          .update(data)
-          .eq("id", id)
-          .select()
-          .single();
-
+  // Fetch client data if editing
+  const { data: client, isLoading } = useQuery(
+    ['client', id],
+    async () => {
+      if (id) {
+        const { data, error } = await supabase.from("clients").select("*").eq("id", id).single();
         if (error) throw error;
-        return updatedClient;
-      } else {
-        const { data: newClient, error } = await supabase
-          .from("clients")
-          .insert([data])
-          .select()
-          .single();
-
-        if (error) throw error;
-        return newClient;
+        return data;
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
-      toast({
-        title: isEditMode ? "Client updated" : "Client added",
-        description: "The client data has been saved successfully.",
-      });
-      navigate("/clients");
+    {
+      enabled: !!id,
+      onSuccess: (data) => {
+        setClientName(data.name);
+        setAgentName(data.agent_name);
+        setGoogleDriveLinks(data.google_drive_links || []);
+        setWebsiteUrls(data.website_urls || []);
+      },
+    }
+  );
+
+  // Mutation for saving the client data
+  const saveClientMutation = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        name: clientName,
+        agent_name: agentName,
+        google_drive_links: googleDriveLinks,
+        website_urls: websiteUrls,
+      };
+      const { data, error } = await supabase.from("clients").upsert(payload);
+      if (error) throw error;
+      return data;
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: `Failed to save client. Please try again. Error: ${error.message}`,
-        variant: "destructive",
-      });
+    onSuccess: () => {
+      navigate("/clients");
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    addOrUpdateClientMutation.mutate(formData);
+  const handleAddGoogleDriveLink = () => {
+    setGoogleDriveLinks((prev) => [...prev, ""]);
   };
 
+  const handleRemoveGoogleDriveLink = (index: number) => {
+    setGoogleDriveLinks((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAddWebsiteUrl = () => {
+    setWebsiteUrls((prev) => [...prev, ""]);
+  };
+
+  const handleRemoveWebsiteUrl = (index: number) => {
+    setWebsiteUrls((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSave = () => {
+    saveClientMutation.mutate();
+  };
+
+  const handleCancel = () => {
+    navigate("/clients");
+  };
+
+  if (isLoading) return <div>Loading...</div>;
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <Button
-        variant="ghost"
-        className="mb-6"
-        onClick={() => navigate("/clients")}
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Clients
-      </Button>
-
-      <h1 className="text-3xl font-bold mb-8">
-        {isEditMode ? `Edit Client - ${formData.name}` : "Add New Client"}
-      </h1>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="text-sm font-medium leading-none">Client Name</label>
-          <Input
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <h1 className="text-3xl font-bold">{id ? `Edit Client - ${clientName}` : "Add New Client"}</h1>
+      <form onSubmit={(e) => e.preventDefault()}>
+        {/* Client Name Field */}
+        <div className="mb-4">
+          <label htmlFor="clientName" className="block font-medium">Client Name</label>
+          <input
+            id="clientName"
+            type="text"
+            value={clientName}
+            onChange={(e) => setClientName(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded"
             required
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           />
         </div>
 
-        <div>
-          <label className="text-sm font-medium leading-none">AI Agent Name</label>
-          <Input
-            required
-            value={formData.agent_name}
-            onChange={(e) => setFormData({ ...formData, agent_name: e.target.value })}
+        {/* AI Agent Name Field */}
+        <div className="mb-4">
+          <label htmlFor="agentName" className="block font-medium">AI Agent Name</label>
+          <input
+            id="agentName"
+            type="text"
+            value={agentName}
+            onChange={(e) => setAgentName(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
-        {/* Add other fields for Google Drive Links, Website URLs, etc. */}
+        {/* Google Drive Links Section */}
+        <div className="mb-6">
+          <label className="block font-medium">Google Drive Share Links</label>
+          {googleDriveLinks.map((link, index) => (
+            <div key={index} className="flex items-center gap-2 mb-2">
+              <input
+                type="text"
+                value={link}
+                onChange={(e) => {
+                  const newLinks = [...googleDriveLinks];
+                  newLinks[index] = e.target.value;
+                  setGoogleDriveLinks(newLinks);
+                }}
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+              <button
+                type="button"
+                onClick={() => handleRemoveGoogleDriveLink(index)}
+                className="text-red-500"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={handleAddGoogleDriveLink}
+            className="text-blue-500"
+          >
+            + Add Google Drive Link
+          </button>
+        </div>
 
-        <div className="flex justify-end gap-4">
-          <Button type="button" variant="outline" onClick={() => navigate("/clients")}>
-            Cancel
+        {/* Website URLs Section */}
+        <div className="mb-6">
+          <label className="block font-medium">Website URLs</label>
+          {websiteUrls.map((url, index) => (
+            <div key={index} className="flex items-center gap-2 mb-2">
+              <input
+                type="text"
+                value={url}
+                onChange={(e) => {
+                  const newUrls = [...websiteUrls];
+                  newUrls[index] = e.target.value;
+                  setWebsiteUrls(newUrls);
+                }}
+                className="w-full p-2 border border-gray-300 rounded"
+              />
+              <button
+                type="button"
+                onClick={() => handleRemoveWebsiteUrl(index)}
+                className="text-red-500"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={handleAddWebsiteUrl}
+            className="text-blue-500"
+          >
+            + Add Website URL
+          </button>
+        </div>
+
+        {/* Save and Cancel Buttons */}
+        <div className="flex gap-4">
+          <Button onClick={handleSave} className="bg-green-500 text-white">
+            Save Client
           </Button>
-          <Button type="submit" disabled={addOrUpdateClientMutation.isLoading}>
-            {addOrUpdateClientMutation.isLoading ? "Saving..." : "Save Client"}
+          <Button onClick={handleCancel} className="bg-gray-500 text-white">
+            Cancel
           </Button>
         </div>
       </form>
     </div>
   );
-}
+};
+
+export default AddEditClient;
