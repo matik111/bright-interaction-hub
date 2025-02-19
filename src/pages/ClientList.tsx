@@ -1,15 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { FaEye, FaEdit, FaTrash, FaCog } from 'react-icons/fa';
+import { supabase } from '../supabaseClient'; // Adjust the import path as needed
 
 const ClientList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOption, setSortOption] = useState('Client Name');
+  const [clients, setClients] = useState([]);
 
-  const clients = [
-    // Sample data for illustration
-    { clientName: 'Client A', aiAgentName: 'Agent 1', status: 'Active', lastUpdated: '2025-02-18' },
-    { clientName: 'Client B', aiAgentName: 'Agent 2', status: 'Inactive', lastUpdated: '2025-02-17' },
-    // Add more clients as needed
-  ];
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  const fetchClients = async () => {
+    const { data, error } = await supabase
+      .from('clients')
+      .select('*');
+    if (error) {
+      console.error('Error fetching clients:', error);
+    } else {
+      setClients(data);
+    }
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -19,19 +31,31 @@ const ClientList: React.FC = () => {
     setSortOption(e.target.value);
   };
 
+  const handleDeleteClient = async (id: number) => {
+    const { error } = await supabase
+      .from('clients')
+      .delete()
+      .eq('id', id);
+    if (error) {
+      console.error('Error deleting client:', error);
+    } else {
+      fetchClients();
+    }
+  };
+
   const filteredClients = clients.filter(client =>
-    client.clientName.toLowerCase().includes(searchTerm.toLowerCase())
+    client.client_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const sortedClients = filteredClients.sort((a, b) => {
     if (sortOption === 'Client Name') {
-      return a.clientName.localeCompare(b.clientName);
+      return a.client_name.localeCompare(b.client_name);
     } else if (sortOption === 'AI Agent Name') {
-      return a.aiAgentName.localeCompare(b.aiAgentName);
+      return a.ai_agent_name.localeCompare(b.ai_agent_name);
     } else if (sortOption === 'Status') {
       return a.status.localeCompare(b.status);
     } else if (sortOption === 'Last Updated') {
-      return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
+      return new Date(b.last_updated).getTime() - new Date(a.last_updated).getTime();
     }
     return 0;
   });
@@ -52,13 +76,19 @@ const ClientList: React.FC = () => {
           <option value="Status">Status</option>
           <option value="Last Updated">Last Updated</option>
         </select>
-        <button>+ Add New Client</button>
+        <Link to="/add-edit-client">
+          <button>+ Add New Client</button>
+        </Link>
       </div>
       <table>
         <thead>
           <tr>
             <th>Client Name</th>
+            <th>Email</th>
+            <th>Company</th>
             <th>AI Agent Name</th>
+            <th>Website URLs</th>
+            <th>Google Drive URLs</th>
             <th>Status</th>
             <th>Last Updated</th>
             <th>Actions</th>
@@ -67,14 +97,23 @@ const ClientList: React.FC = () => {
         <tbody>
           {sortedClients.map((client, index) => (
             <tr key={index}>
-              <td>{client.clientName}</td>
-              <td>{client.aiAgentName}</td>
+              <td>{client.client_name}</td>
+              <td>{client.email}</td>
+              <td>{client.company}</td>
+              <td>{client.ai_agent_name}</td>
+              <td>{client.website_urls}</td>
+              <td>{client.google_drive_urls}</td>
               <td>{client.status}</td>
-              <td>{client.lastUpdated}</td>
+              <td>{client.last_updated}</td>
               <td>
-                <button>View</button>
-                <button>Edit</button>
-                <button>Delete</button>
+                <Link to={`/view-client/${client.id}`}>
+                  <FaEye />
+                </Link>
+                <Link to={`/add-edit-client/${client.id}`}>
+                  <FaEdit />
+                </Link>
+                <FaTrash onClick={() => handleDeleteClient(client.id)} />
+                <FaCog />
               </td>
             </tr>
           ))}
