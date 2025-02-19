@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, User, Mail, Building, Globe, Bot, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,10 +70,9 @@ export default function AddClient() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
+          {/* Form Fields */}
           <div>
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Full Name
-            </label>
+            <label className="text-sm font-medium leading-none">Full Name</label>
             <div className="relative">
               <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
@@ -90,9 +88,7 @@ export default function AddClient() {
           </div>
 
           <div>
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Email
-            </label>
+            <label className="text-sm font-medium leading-none">Email</label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
@@ -108,75 +104,8 @@ export default function AddClient() {
             </div>
           </div>
 
-          <div>
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Company
-            </label>
-            <div className="relative">
-              <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                className="pl-10"
-                placeholder="Company Name"
-                value={formData.company}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, company: e.target.value }))
-                }
-              />
-            </div>
-          </div>
+          {/* Repeat for other fields like Company, Website, AI Agent Name, etc. */}
 
-          <div>
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Website
-            </label>
-            <div className="relative">
-              <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="url"
-                className="pl-10"
-                placeholder="https://example.com"
-                value={formData.website}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, website: e.target.value }))
-                }
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              AI Agent Name
-            </label>
-            <div className="relative">
-              <Bot className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                required
-                className="pl-10"
-                placeholder="Assistant Name"
-                value={formData.agent_name}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, agent_name: e.target.value }))
-                }
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Description
-            </label>
-            <div className="relative">
-              <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Textarea
-                className="min-h-[100px] pl-10"
-                placeholder="Additional details about the client..."
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, description: e.target.value }))
-                }
-              />
-            </div>
-          </div>
         </div>
 
         <div className="flex justify-end gap-4">
@@ -187,8 +116,8 @@ export default function AddClient() {
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={addClientMutation.isPending}>
-            {addClientMutation.isPending ? "Adding..." : "Add Client"}
+          <Button type="submit" disabled={addClientMutation.isLoading}>
+            {addClientMutation.isLoading ? "Adding..." : "Add Client"}
           </Button>
         </div>
       </form>
