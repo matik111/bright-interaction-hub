@@ -5,13 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardHeader, CardBody } from "@/components/ui/card"; // Assuming you have a Card component
-import { Form, FormItem, FormLabel } from "@/components/ui/form"; // Assuming a Form component
+import { Card, CardHeader, CardBody } from "@/components/ui/card"; 
+import { Form, FormItem, FormLabel } from "@/components/ui/form"; 
 
 const AddEditClient = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
+  // State variables for form data
   const [clientName, setClientName] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -75,6 +76,15 @@ const AddEditClient = () => {
     saveClientMutation.mutate();
   };
 
+  // Function to delete a Google Drive link or website URL
+  const handleDeleteLink = (url: string, type: 'google' | 'website') => {
+    if (type === 'google') {
+      setGoogleDriveLinks(googleDriveLinks.filter(link => link !== url));
+    } else if (type === 'website') {
+      setWebsiteUrls(websiteUrls.filter(link => link !== url));
+    }
+  };
+
   return (
     <div className="dashboard-container">
       <div className="sidebar"> {/* Sidebar for consistency with dashboard */} </div>
@@ -89,7 +99,7 @@ const AddEditClient = () => {
 
           <CardBody>
             <Form onSubmit={handleSubmit} className="client-form">
-              {/* Name */}
+              {/* Client Name */}
               <FormItem>
                 <FormLabel>Client Name</FormLabel>
                 <Input
@@ -130,7 +140,7 @@ const AddEditClient = () => {
                   type="text"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  placeholder="Enter company"
+                  placeholder="Enter company name"
                 />
               </FormItem>
 
@@ -141,19 +151,72 @@ const AddEditClient = () => {
                   type="url"
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
-                  placeholder="Enter website"
+                  placeholder="https://example.com"
                 />
               </FormItem>
 
-              {/* Agent Name */}
+              {/* Google Drive Links */}
               <FormItem>
-                <FormLabel>Agent Name</FormLabel>
-                <Input
-                  type="text"
-                  value={agentName}
-                  onChange={(e) => setAgentName(e.target.value)}
-                  placeholder="Enter AI agent name"
-                />
+                <FormLabel>Google Drive Links</FormLabel>
+                <div>
+                  {googleDriveLinks.map((link, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <Input
+                        type="url"
+                        value={link}
+                        onChange={(e) =>
+                          setGoogleDriveLinks(googleDriveLinks.map((l, i) => i === index ? e.target.value : l))
+                        }
+                        placeholder="Google Drive URL"
+                        className="mb-2"
+                      />
+                      <Button
+                        variant="destructive"
+                        onClick={() => handleDeleteLink(link, 'google')}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    onClick={() => setGoogleDriveLinks([...googleDriveLinks, ""])}
+                  >
+                    Add Google Drive Link
+                  </Button>
+                </div>
+              </FormItem>
+
+              {/* Website URLs */}
+              <FormItem>
+                <FormLabel>Website URLs</FormLabel>
+                <div>
+                  {websiteUrls.map((url, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <Input
+                        type="url"
+                        value={url}
+                        onChange={(e) =>
+                          setWebsiteUrls(websiteUrls.map((u, i) => i === index ? e.target.value : u))
+                        }
+                        placeholder="Website URL"
+                        className="mb-2"
+                      />
+                      <Button
+                        variant="destructive"
+                        onClick={() => handleDeleteLink(url, 'website')}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    onClick={() => setWebsiteUrls([...websiteUrls, ""])}
+                  >
+                    Add Website URL
+                  </Button>
+                </div>
               </FormItem>
 
               {/* Description */}
@@ -163,12 +226,18 @@ const AddEditClient = () => {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Enter description"
+                  rows={4}
                 />
               </FormItem>
 
-              <div className="form-actions">
-                <Button type="submit" className="save-btn">Save Changes</Button>
-                <Button type="button" className="cancel-btn" onClick={() => navigate("/clients")}>Cancel</Button>
+              {/* Submit Button */}
+              <div className="flex justify-between items-center mt-6">
+                <Button variant="ghost" onClick={() => navigate("/clients")}>
+                  Cancel
+                </Button>
+                <Button type="submit" variant="primary">
+                  Save Changes
+                </Button>
               </div>
             </Form>
           </CardBody>
