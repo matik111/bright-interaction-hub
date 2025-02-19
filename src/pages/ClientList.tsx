@@ -116,6 +116,8 @@ export default function ClientList() {
             <TableRow>
               <TableHead>Client Name</TableHead>
               <TableHead>AI Agent Name</TableHead>
+              <TableHead>Google Drive Links</TableHead>
+              <TableHead>Website URLs</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Last Updated</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -124,68 +126,62 @@ export default function ClientList() {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
+                <TableCell colSpan={7} className="text-center py-8">
                   Loading...
                 </TableCell>
               </TableRow>
             ) : clients?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8">
+                <TableCell colSpan={7} className="text-center py-8">
                   No clients found
                 </TableCell>
               </TableRow>
             ) : (
               clients?.map((client) => (
                 <TableRow key={client.id}>
-                  <TableCell className="font-medium">
-                    <div>
+                  <TableCell>
+                    <Link to={`/clients/${client.id}`} className="text-blue-500 hover:underline">
                       {client.name}
-                      {client.company && (
-                        <div className="text-sm text-muted-foreground">
-                          {client.company}
-                        </div>
-                      )}
-                    </div>
+                    </Link>
                   </TableCell>
                   <TableCell>{client.agent_name}</TableCell>
                   <TableCell>
-                    <Badge 
-                      variant={client.status === "active" ? "default" : "secondary"}
-                    >
-                      {client.status}
+                    {client.google_drive_links?.length > 0 ? (
+                      <ul>
+                        {client.google_drive_links.map((link, index) => (
+                          <li key={index}>{link}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <span>No links available</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {client.website_urls?.length > 0 ? (
+                      <ul>
+                        {client.website_urls.map((url, index) => (
+                          <li key={index}>{url}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <span>No URLs available</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="text-muted-foreground">
+                      Active
                     </Badge>
                   </TableCell>
                   <TableCell>
                     {formatDistanceToNow(new Date(client.updated_at), { addSuffix: true })}
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => navigate(`/clients/${client.id}`)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon">
-                        <Settings className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => navigate(`/clients/edit/${client.id}`)} // Update this line for the edit functionality
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive"
-                        onClick={() => handleDelete(client.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <Button variant="ghost" onClick={() => navigate(`/clients/edit/${client.id}`)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" onClick={() => handleDelete(client.id)}>
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
