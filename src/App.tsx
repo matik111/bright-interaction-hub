@@ -1,3 +1,4 @@
+import React from "react"; // <-- Ensure this is included
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"; // Import QueryClient
 import Index from "./pages/Index";
@@ -27,7 +28,7 @@ class ErrorBoundary extends React.Component {
       return <h1>Something went wrong. Please try refreshing the page.</h1>;
     }
 
-    return this.props.children; 
+    return this.props.children;
   }
 }
 
