@@ -136,7 +136,7 @@ const AddEditClient = () => {
             onClick={handleAddGoogleDriveLink}
             className="text-blue-500"
           >
-            + Add Google Drive Link
+            Add Google Drive Link
           </button>
         </div>
 
@@ -169,18 +169,14 @@ const AddEditClient = () => {
             onClick={handleAddWebsiteUrl}
             className="text-blue-500"
           >
-            + Add Website URL
+            Add Website URL
           </button>
         </div>
 
-        {/* Save and Cancel Buttons */}
+        {/* Save/Cancel Buttons */}
         <div className="flex gap-4">
-          <Button onClick={handleSave} className="bg-green-500 text-white">
-            Save Client
-          </Button>
-          <Button onClick={handleCancel} className="bg-gray-500 text-white">
-            Cancel
-          </Button>
+          <Button onClick={handleSave} className="bg-green-500 text-white">Save</Button>
+          <Button onClick={handleCancel} className="bg-gray-500 text-white">Cancel</Button>
         </div>
       </form>
     </div>
