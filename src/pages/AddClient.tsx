@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, User, Mail, Building, Globe, Bot, FileText } from "lucide-react";
@@ -161,7 +161,7 @@ export default function AddClient() {
               <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Textarea
                 className="pl-10"
-                placeholder="Describe the client"
+                placeholder="Brief description"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, description: e.target.value }))
