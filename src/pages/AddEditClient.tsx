@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,19 +30,21 @@ const AddEditClient = () => {
     },
     enabled: !!id,
     onSuccess: (data) => {
-      setClientName(data.name);
-      setFullName(data.full_name || "");
-      setEmail(data.email || "");
-      setCompany(data.company || "");
-      setWebsite(data.website || "");
-      setAgentName(data.agent_name || "");
-      setDescription(data.description || "");
-      setGoogleDriveLinks(data.google_drive_links || []);
-      setWebsiteUrls(data.website_urls || []);
+      if (data) {
+        setClientName(data.name);
+        setFullName(data.full_name || "");
+        setEmail(data.email || "");
+        setCompany(data.company || "");
+        setWebsite(data.website || "");
+        setAgentName(data.agent_name || "");
+        setDescription(data.description || "");
+        setGoogleDriveLinks(data.google_drive_links || []);
+        setWebsiteUrls(data.website_urls || []);
+      }
     },
   });
 
-  // Mutation for saving the client data
+  // Mutation for saving the client data (update or add)
   const saveClientMutation = useMutation({
     mutationFn: async () => {
       const payload = {
@@ -66,190 +68,152 @@ const AddEditClient = () => {
     },
   });
 
-  const handleAddGoogleDriveLink = () => {
-    setGoogleDriveLinks((prev) => [...prev, ""]);
+  // Mutation for deleting the client data
+  const deleteClientMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("clients").delete().eq("id", id);
+      if (error) throw error;
+      return;
+    },
+    onSuccess: () => {
+      navigate("/clients"); // Redirect after successful deletion
+    },
+  });
+
+  const handleDelete = () => {
+    if (window.confirm("Are you sure you want to delete this client?")) {
+      deleteClientMutation.mutate();
+    }
   };
 
-  const handleRemoveGoogleDriveLink = (index: number) => {
-    setGoogleDriveLinks((prev) => prev.filter((_, i) => i !== index));
+  const handleAddGoogleDriveLink = () => {
+    setGoogleDriveLinks((prev) => [...prev, ""]);
   };
 
   const handleAddWebsiteUrl = () => {
     setWebsiteUrls((prev) => [...prev, ""]);
   };
 
-  const handleRemoveWebsiteUrl = (index: number) => {
-    setWebsiteUrls((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSave = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     saveClientMutation.mutate();
   };
 
-  const handleCancel = () => {
-    navigate("/clients");
-  };
-
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <h1 className="text-3xl font-bold">{id ? `Edit Client - ${clientName}` : "Add New Client"}</h1>
-      <form onSubmit={(e) => e.preventDefault()}>
-        {/* Client Name Field */}
-        <div className="mb-4">
-          <label htmlFor="clientName" className="block font-medium">Client Name</label>
+    <div className="container">
+      <h1>{id ? "Edit Client" : "Add Client"}</h1>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Client Name</label>
           <input
-            id="clientName"
             type="text"
             value={clientName}
             onChange={(e) => setClientName(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
-            required
           />
         </div>
-
-        {/* Full Name Field */}
-        <div className="mb-4">
-          <label htmlFor="fullName" className="block font-medium">Full Name</label>
+        <div>
+          <label>Full Name</label>
           <input
-            id="fullName"
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
-
-        {/* Email Field */}
-        <div className="mb-4">
-          <label htmlFor="email" className="block font-medium">Email</label>
+        <div>
+          <label>Email</label>
           <input
-            id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
-
-        {/* Company Field */}
-        <div className="mb-4">
-          <label htmlFor="company" className="block font-medium">Company</label>
+        <div>
+          <label>Company</label>
           <input
-            id="company"
             type="text"
             value={company}
             onChange={(e) => setCompany(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
-
-        {/* Website Field */}
-        <div className="mb-4">
-          <label htmlFor="website" className="block font-medium">Website</label>
+        <div>
+          <label>Website</label>
           <input
-            id="website"
             type="text"
             value={website}
             onChange={(e) => setWebsite(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
-
-        {/* AI Agent Name Field */}
-        <div className="mb-4">
-          <label htmlFor="agentName" className="block font-medium">AI Agent Name</label>
+        <div>
+          <label>Agent Name</label>
           <input
-            id="agentName"
             type="text"
             value={agentName}
             onChange={(e) => setAgentName(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
-
-        {/* Description Field */}
-        <div className="mb-4">
-          <label htmlFor="description" className="block font-medium">Description</label>
+        <div>
+          <label>Description</label>
           <textarea
-            id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
 
-        {/* Google Drive Links Section */}
-        <div className="mb-6">
-          <label className="block font-medium">Google Drive Share Links</label>
-          {googleDriveLinks.map((link, index) => (
-            <div key={index} className="flex items-center gap-2 mb-2">
-              <input
-                type="text"
-                value={link}
-                onChange={(e) => {
-                  const newLinks = [...googleDriveLinks];
-                  newLinks[index] = e.target.value;
-                  setGoogleDriveLinks(newLinks);
-                }}
-                className="w-full p-2 border border-gray-300 rounded"
-              />
-              <button
-                type="button"
-                onClick={() => handleRemoveGoogleDriveLink(index)}
-                className="text-red-500"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={handleAddGoogleDriveLink}
-            className="text-blue-500"
-          >
+        <div>
+          <label>Google Drive Links</label>
+          <button type="button" onClick={handleAddGoogleDriveLink}>
             Add Google Drive Link
           </button>
+          {googleDriveLinks.map((link, index) => (
+            <input
+              key={index}
+              type="text"
+              value={link}
+              onChange={(e) =>
+                setGoogleDriveLinks((prev) =>
+                  prev.map((l, i) => (i === index ? e.target.value : l))
+                )
+              }
+            />
+          ))}
         </div>
 
-        {/* Website URLs Section */}
-        <div className="mb-6">
-          <label className="block font-medium">Website URLs</label>
-          {websiteUrls.map((url, index) => (
-            <div key={index} className="flex items-center gap-2 mb-2">
-              <input
-                type="text"
-                value={url}
-                onChange={(e) => {
-                  const newUrls = [...websiteUrls];
-                  newUrls[index] = e.target.value;
-                  setWebsiteUrls(newUrls);
-                }}
-                className="w-full p-2 border border-gray-300 rounded"
-              />
-              <button
-                type="button"
-                onClick={() => handleRemoveWebsiteUrl(index)}
-                className="text-red-500"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={handleAddWebsiteUrl}
-            className="text-blue-500"
-          >
+        <div>
+          <label>Website URLs</label>
+          <button type="button" onClick={handleAddWebsiteUrl}>
             Add Website URL
           </button>
+          {websiteUrls.map((url, index) => (
+            <input
+              key={index}
+              type="text"
+              value={url}
+              onChange={(e) =>
+                setWebsiteUrls((prev) =>
+                  prev.map((u, i) => (i === index ? e.target.value : u))
+                )
+              }
+            />
+          ))}
         </div>
 
-        {/* Save and Cancel Buttons */}
-        <div className="flex gap-4">
-          <Button onClick={handleSave}>Save</Button>
-          <Button onClick={handleCancel}>Cancel</Button>
+        <div className="actions">
+          <Button type="submit">
+            {id ? "Update Client" : "Add Client"}
+          </Button>
+          {id && (
+            <Button
+              type="button"
+              onClick={handleDelete}
+              variant="destructive"
+            >
+              Delete Client
+            </Button>
+          )}
         </div>
       </form>
     </div>
