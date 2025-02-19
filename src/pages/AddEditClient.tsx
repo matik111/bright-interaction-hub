@@ -20,7 +20,7 @@ const AddEditClient = () => {
   const [website, setWebsite] = useState("");
   const [agentName, setAgentName] = useState("");
   const [description, setDescription] = useState("");
-  const [googleDriveLinks, setGoogleDriveLinks] = useState<string[]>([]);
+  const [googleDriveLinksAddedAt, setGoogleDriveLinksAddedAt] = useState<string[]>([]); // Updated to handle the timestamps
   const [websiteUrls, setWebsiteUrls] = useState<string[]>([]);
 
   // Fetch client data if editing
@@ -28,7 +28,11 @@ const AddEditClient = () => {
     queryKey: ['client', id],
     queryFn: async () => {
       if (id) {
-        const { data, error } = await supabase.from("clients").select("*").eq("id", id).single();
+        const { data, error } = await supabase
+          .from("clients")
+          .select("*")
+          .eq("id", id)
+          .single();
         if (error) throw error;
         return data;
       }
@@ -42,7 +46,7 @@ const AddEditClient = () => {
       setWebsite(data.website || "");
       setAgentName(data.agent_name || "");
       setDescription(data.description || "");
-      setGoogleDriveLinks(data.google_drive_links || []);
+      setGoogleDriveLinksAddedAt(data.google_drive_links_added_at || []); // Assigning the timestamp data
       setWebsiteUrls(data.website_urls || []);
     },
   });
@@ -58,7 +62,7 @@ const AddEditClient = () => {
         website: website,
         agent_name: agentName,
         description: description,
-        google_drive_links: googleDriveLinks,
+        google_drive_links_added_at: googleDriveLinksAddedAt, // Saving the timestamp
         website_urls: websiteUrls,
         updated_at: new Date().toISOString(),
       };
@@ -79,7 +83,7 @@ const AddEditClient = () => {
   // Function to delete a Google Drive link or website URL
   const handleDeleteLink = (url: string, type: 'google' | 'website') => {
     if (type === 'google') {
-      setGoogleDriveLinks(googleDriveLinks.filter(link => link !== url));
+      setGoogleDriveLinksAddedAt(googleDriveLinksAddedAt.filter(link => link !== url));
     } else if (type === 'website') {
       setWebsiteUrls(websiteUrls.filter(link => link !== url));
     }
@@ -140,7 +144,7 @@ const AddEditClient = () => {
                   type="text"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  placeholder="Enter company name"
+                  placeholder="Enter company"
                 />
               </FormItem>
 
@@ -148,75 +152,22 @@ const AddEditClient = () => {
               <FormItem>
                 <FormLabel>Website</FormLabel>
                 <Input
-                  type="url"
+                  type="text"
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
-                  placeholder="https://example.com"
+                  placeholder="Enter website"
                 />
               </FormItem>
 
-              {/* Google Drive Links */}
+              {/* Agent Name */}
               <FormItem>
-                <FormLabel>Google Drive Links</FormLabel>
-                <div>
-                  {googleDriveLinks.map((link, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <Input
-                        type="url"
-                        value={link}
-                        onChange={(e) =>
-                          setGoogleDriveLinks(googleDriveLinks.map((l, i) => i === index ? e.target.value : l))
-                        }
-                        placeholder="Google Drive URL"
-                        className="mb-2"
-                      />
-                      <Button
-                        variant="destructive"
-                        onClick={() => handleDeleteLink(link, 'google')}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  ))}
-                  <Button
-                    variant="outline"
-                    onClick={() => setGoogleDriveLinks([...googleDriveLinks, ""])}
-                  >
-                    Add Google Drive Link
-                  </Button>
-                </div>
-              </FormItem>
-
-              {/* Website URLs */}
-              <FormItem>
-                <FormLabel>Website URLs</FormLabel>
-                <div>
-                  {websiteUrls.map((url, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <Input
-                        type="url"
-                        value={url}
-                        onChange={(e) =>
-                          setWebsiteUrls(websiteUrls.map((u, i) => i === index ? e.target.value : u))
-                        }
-                        placeholder="Website URL"
-                        className="mb-2"
-                      />
-                      <Button
-                        variant="destructive"
-                        onClick={() => handleDeleteLink(url, 'website')}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  ))}
-                  <Button
-                    variant="outline"
-                    onClick={() => setWebsiteUrls([...websiteUrls, ""])}
-                  >
-                    Add Website URL
-                  </Button>
-                </div>
+                <FormLabel>Agent Name</FormLabel>
+                <Input
+                  type="text"
+                  value={agentName}
+                  onChange={(e) => setAgentName(e.target.value)}
+                  placeholder="Enter agent name"
+                />
               </FormItem>
 
               {/* Description */}
@@ -226,19 +177,31 @@ const AddEditClient = () => {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Enter description"
-                  rows={4}
                 />
               </FormItem>
 
-              {/* Submit Button */}
-              <div className="flex justify-between items-center mt-6">
-                <Button variant="ghost" onClick={() => navigate("/clients")}>
-                  Cancel
-                </Button>
-                <Button type="submit" variant="primary">
-                  Save Changes
-                </Button>
-              </div>
+              {/* Google Drive Links Added At */}
+              <FormItem>
+                <FormLabel>Google Drive Links Added At</FormLabel>
+                <Textarea
+                  value={googleDriveLinksAddedAt.join(", ")} // Display timestamp list
+                  onChange={(e) => setGoogleDriveLinksAddedAt(e.target.value.split(", "))}
+                  placeholder="Enter Google Drive links timestamps"
+                />
+              </FormItem>
+
+              {/* Website URLs */}
+              <FormItem>
+                <FormLabel>Website URLs</FormLabel>
+                <Textarea
+                  value={websiteUrls.join(", ")} // Display website URLs list
+                  onChange={(e) => setWebsiteUrls(e.target.value.split(", "))}
+                  placeholder="Enter website URLs"
+                />
+              </FormItem>
+
+              {/* Save Button */}
+              <Button type="submit">Save Client</Button>
             </Form>
           </CardBody>
         </Card>
