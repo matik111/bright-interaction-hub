@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { 
   Plus, 
@@ -32,7 +32,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
 
-type SortField = "name" | "agent_name" | "status" | "updated_at";
+type SortField = "full_name" | "agent_name" | "status" | "updated_at";
 
 export default function ClientList() {
   const navigate = useNavigate();
@@ -47,13 +47,14 @@ export default function ClientList() {
     queryFn: async () => {
       let query = supabase
         .from("clients")
-        .select("*")
-        .ilike("name", `%${search}%`)
-        .or(`email.ilike.%${search}%,company.ilike.%${search}%`);
+        .select("id, full_name, email, company, agent_name, status, updated_at, created_at")  // Include timestamp fields
+        .ilike("full_name", `%${search}%`)  // Search filter by full_name
+        .or(`email.ilike.%${search}%,company.ilike.%${search}%`);  // Search filter by email and company
 
-      query = query.order(sortBy, { ascending: sortBy !== "updated_at" });
+      query = query.order(sortBy, { ascending: sortBy !== "updated_at" });  // Dynamic sorting
 
-      const { data, error } = await query.range((currentPage - 1) * pageSize, currentPage * pageSize - 1); // Pagination logic
+      // Pagination logic
+      const { data, error } = await query.range((currentPage - 1) * pageSize, currentPage * pageSize - 1); 
       if (error) throw error;
       return data;
     },
@@ -80,7 +81,7 @@ export default function ClientList() {
   };
 
   const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
+    setCurrentPage(newPage);  // Update current page for pagination
   };
 
   return (
@@ -108,7 +109,7 @@ export default function ClientList() {
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="name">Client Name</SelectItem>
+            <SelectItem value="full_name">Full Name</SelectItem>
             <SelectItem value="agent_name">AI Agent Name</SelectItem>
             <SelectItem value="status">Status</SelectItem>
             <SelectItem value="updated_at">Last Updated</SelectItem>
@@ -121,9 +122,9 @@ export default function ClientList() {
           <TableHeader>
             <TableRow>
               <TableHead>Full Name</TableHead>
+              <TableHead>AI Agent Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Company</TableHead>
-              <TableHead>AI Agent Name</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Last Updated</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -136,44 +137,54 @@ export default function ClientList() {
                   Loading...
                 </TableCell>
               </TableRow>
+            ) : clients?.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-8">
+                  No clients found
+                </TableCell>
+              </TableRow>
             ) : (
               clients?.map((client) => (
                 <TableRow key={client.id}>
                   <TableCell>{client.full_name}</TableCell>
+                  <TableCell>{client.agent_name}</TableCell>
                   <TableCell>{client.email}</TableCell>
                   <TableCell>{client.company}</TableCell>
-                  <TableCell>{client.agent_name}</TableCell>
                   <TableCell>
                     <Badge variant={client.status === "active" ? "success" : "destructive"}>
                       {client.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{formatDistanceToNow(new Date(client.updated_at))} ago</TableCell>
+                  <TableCell>
+                    {formatDistanceToNow(new Date(client.updated_at))} ago
+                  </TableCell>
                   <TableCell className="text-right space-x-2">
                     <Link to={`/clients/view/${client.id}`}>
-                      <Eye className="text-blue-500 cursor-pointer" />
+                      <Eye className="h-4 w-4 text-blue-600" />
                     </Link>
                     <Link to={`/clients/edit/${client.id}`}>
-                      <Edit className="text-yellow-500 cursor-pointer" />
+                      <Edit className="h-4 w-4 text-green-600" />
                     </Link>
-                    <Settings className="text-gray-500 cursor-pointer" />
-                    <Trash2
-                      className="text-red-500 cursor-pointer"
-                      onClick={() => handleDelete(client.id)}
-                    />
+                    <button onClick={() => handleDelete(client.id)}>
+                      <Trash2 className="h-4 w-4 text-red-600" />
+                    </button>
                   </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
-      </div>
 
-      <div className="flex justify-between items-center mt-4">
-        <Button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
-          Previous
-        </Button>
-        <Button onClick={() => handlePageChange(currentPage + 1)}>Next</Button>
+        {/* Pagination Controls */}
+        <div className="mt-4 flex justify-between items-center">
+          <Button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+            Prev
+          </Button>
+          <span>Page {currentPage}</span>
+          <Button onClick={() => handlePageChange(currentPage + 1)}>
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );
