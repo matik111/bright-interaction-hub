@@ -40,6 +40,8 @@ const AddEditClient = () => {
         agent_name: agentName,
         google_drive_links: googleDriveLinks,
         website_urls: websiteUrls,
+        updated_at: new Date().toISOString(),  // Update the updated_at timestamp
+        // created_at will automatically be set if it's a new entry
       };
       const { data, error } = await supabase.from("clients").upsert(payload);
       if (error) throw error;
@@ -129,13 +131,7 @@ const AddEditClient = () => {
               </button>
             </div>
           ))}
-          <button
-            type="button"
-            onClick={handleAddGoogleDriveLink}
-            className="text-blue-500"
-          >
-            Add Google Drive Link
-          </button>
+          <Button onClick={handleAddGoogleDriveLink}>Add Google Drive Link</Button>
         </div>
 
         {/* Website URLs Section */}
@@ -162,19 +158,13 @@ const AddEditClient = () => {
               </button>
             </div>
           ))}
-          <button
-            type="button"
-            onClick={handleAddWebsiteUrl}
-            className="text-blue-500"
-          >
-            Add Website URL
-          </button>
+          <Button onClick={handleAddWebsiteUrl}>Add Website URL</Button>
         </div>
 
         {/* Save and Cancel Buttons */}
-        <div className="flex gap-4">
-          <Button onClick={handleSave} disabled={saveClientMutation.isLoading}>Save</Button>
-          <Button onClick={handleCancel}>Cancel</Button>
+        <div className="flex justify-end gap-4">
+          <Button onClick={handleSave}>Save</Button>
+          <Button onClick={handleCancel} variant="outline">Cancel</Button>
         </div>
       </form>
     </div>
