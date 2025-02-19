@@ -14,25 +14,23 @@ const AddEditClient = () => {
   const [websiteUrls, setWebsiteUrls] = useState<string[]>([]);
 
   // Fetch client data if editing
-  const { data: client, isLoading } = useQuery(
-    ['client', id],
-    async () => {
+  const { data: client, isLoading } = useQuery({
+    queryKey: ['client', id],  // Use an array for queryKey
+    queryFn: async () => {
       if (id) {
         const { data, error } = await supabase.from("clients").select("*").eq("id", id).single();
         if (error) throw error;
         return data;
       }
     },
-    {
-      enabled: !!id,
-      onSuccess: (data) => {
-        setClientName(data.name);
-        setAgentName(data.agent_name);
-        setGoogleDriveLinks(data.google_drive_links || []);
-        setWebsiteUrls(data.website_urls || []);
-      },
-    }
-  );
+    enabled: !!id,  // Only fetch when there's an id
+    onSuccess: (data) => {
+      setClientName(data.name);
+      setAgentName(data.agent_name);
+      setGoogleDriveLinks(data.google_drive_links || []);
+      setWebsiteUrls(data.website_urls || []);
+    },
+  });
 
   // Mutation for saving the client data
   const saveClientMutation = useMutation({
@@ -173,9 +171,10 @@ const AddEditClient = () => {
           </button>
         </div>
 
+        {/* Save and Cancel Buttons */}
         <div className="flex gap-4">
-          <Button onClick={handleSave} className="w-full">Save Client</Button>
-          <Button variant="secondary" onClick={handleCancel} className="w-full">Cancel</Button>
+          <Button onClick={handleSave} disabled={saveClientMutation.isLoading}>Save</Button>
+          <Button onClick={handleCancel}>Cancel</Button>
         </div>
       </form>
     </div>
