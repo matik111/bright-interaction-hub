@@ -40,8 +40,8 @@ const AddEditClient = () => {
       const payload = {
         name: clientName,
         agent_name: agentName,
-        google_drive_links: googleDriveLinks,  // Ensure we're saving this field
-        website_urls: websiteUrls,  // Ensure we're saving this field
+        google_drive_links: googleDriveLinks,
+        website_urls: websiteUrls,
       };
       const { data, error } = await supabase.from("clients").upsert(payload);
       if (error) throw error;
@@ -136,7 +136,7 @@ const AddEditClient = () => {
             onClick={handleAddGoogleDriveLink}
             className="text-blue-500"
           >
-            + Add Google Drive Link
+            Add Google Drive Link
           </button>
         </div>
 
@@ -169,14 +169,13 @@ const AddEditClient = () => {
             onClick={handleAddWebsiteUrl}
             className="text-blue-500"
           >
-            + Add Website URL
+            Add Website URL
           </button>
         </div>
 
-        {/* Save and Cancel Buttons */}
         <div className="flex gap-4">
-          <Button onClick={handleSave}>Save Client</Button>
-          <Button onClick={handleCancel} variant="outline">Cancel</Button>
+          <Button onClick={handleSave} className="w-full">Save Client</Button>
+          <Button variant="secondary" onClick={handleCancel} className="w-full">Cancel</Button>
         </div>
       </form>
     </div>
