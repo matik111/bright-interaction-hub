@@ -1,4 +1,3 @@
-
 import { Users, MessagesSquare, Activity, Plus, List } from "lucide-react";
 import { StatCard } from "@/components/metrics/StatCard";
 import { ActivityItem } from "@/components/activity/ActivityItem";
@@ -42,7 +41,11 @@ const Index = () => {
           <Button className="shadow-sm">
             <Plus className="mr-2 h-4 w-4" /> Add New Client
           </Button>
-          <Button variant="outline" className="shadow-sm">
+          <Button 
+            variant="outline" 
+            className="shadow-sm"
+            onClick={() => window.location.href = '/clients'}
+          >
             <List className="mr-2 h-4 w-4" /> View Client List
           </Button>
         </div>

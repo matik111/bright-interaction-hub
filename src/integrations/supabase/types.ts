@@ -9,7 +9,153 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      client_activities: {
+        Row: {
+          activity_type: string
+          client_id: string | null
+          created_at: string | null
+          description: string
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          activity_type: string
+          client_id?: string | null
+          created_at?: string | null
+          description: string
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          activity_type?: string
+          client_id?: string | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_activities_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          agent_name: string
+          company: string | null
+          created_at: string | null
+          description: string | null
+          email: string
+          id: string
+          last_active: string | null
+          name: string
+          status: Database["public"]["Enums"]["client_status"] | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          agent_name: string
+          company?: string | null
+          created_at?: string | null
+          description?: string | null
+          email: string
+          id?: string
+          last_active?: string | null
+          name: string
+          status?: Database["public"]["Enums"]["client_status"] | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          agent_name?: string
+          company?: string | null
+          created_at?: string | null
+          description?: string | null
+          email?: string
+          id?: string
+          last_active?: string | null
+          name?: string
+          status?: Database["public"]["Enums"]["client_status"] | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      common_queries: {
+        Row: {
+          client_id: string | null
+          created_at: string | null
+          frequency: number | null
+          id: string
+          query_text: string
+          updated_at: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string | null
+          frequency?: number | null
+          id?: string
+          query_text: string
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string | null
+          frequency?: number | null
+          id?: string
+          query_text?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "common_queries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      error_logs: {
+        Row: {
+          client_id: string | null
+          created_at: string | null
+          error_type: string
+          id: string
+          message: string
+          status: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string | null
+          error_type: string
+          id?: string
+          message: string
+          status?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string | null
+          error_type?: string
+          id?: string
+          message?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "error_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -232,6 +378,7 @@ export type Database = {
       }
     }
     Enums: {
+      client_status: "active" | "inactive"
       source_type: "google_drive" | "website"
       user_role: "admin" | "manager" | "user"
     }
