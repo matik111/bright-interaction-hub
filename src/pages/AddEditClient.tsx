@@ -1,8 +1,12 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardHeader, CardBody } from "@/components/ui/card"; // Assuming you have a Card component
+import { Form, FormItem, FormLabel } from "@/components/ui/form"; // Assuming a Form component
 
 const AddEditClient = () => {
   const { id } = useParams<{ id: string }>();
@@ -30,31 +34,29 @@ const AddEditClient = () => {
     },
     enabled: !!id,
     onSuccess: (data) => {
-      if (data) {
-        setClientName(data.name);
-        setFullName(data.full_name || "");
-        setEmail(data.email || "");
-        setCompany(data.company || "");
-        setWebsite(data.website || "");
-        setAgentName(data.agent_name || "");
-        setDescription(data.description || "");
-        setGoogleDriveLinks(data.google_drive_links || []);
-        setWebsiteUrls(data.website_urls || []);
-      }
+      setClientName(data.name);
+      setFullName(data.full_name || "");
+      setEmail(data.email || "");
+      setCompany(data.company || "");
+      setWebsite(data.website || "");
+      setAgentName(data.agent_name || "");
+      setDescription(data.description || "");
+      setGoogleDriveLinks(data.google_drive_links || []);
+      setWebsiteUrls(data.website_urls || []);
     },
   });
 
-  // Mutation for saving the client data (update or add)
+  // Mutation for saving the client data
   const saveClientMutation = useMutation({
     mutationFn: async () => {
       const payload = {
         name: clientName,
-        full_name: fullName,  // Saving Full Name
-        email: email,          // Saving Email
-        company: company,      // Saving Company
-        website: website,      // Saving Website
-        agent_name: agentName, // Saving AI Agent Name
-        description: description,  // Saving Description
+        full_name: fullName,
+        email: email,
+        company: company,
+        website: website,
+        agent_name: agentName,
+        description: description,
         google_drive_links: googleDriveLinks,
         website_urls: websiteUrls,
         updated_at: new Date().toISOString(),
@@ -68,154 +70,110 @@ const AddEditClient = () => {
     },
   });
 
-  // Mutation for deleting the client data
-  const deleteClientMutation = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from("clients").delete().eq("id", id);
-      if (error) throw error;
-      return;
-    },
-    onSuccess: () => {
-      navigate("/clients"); // Redirect after successful deletion
-    },
-  });
-
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this client?")) {
-      deleteClientMutation.mutate();
-    }
-  };
-
-  const handleAddGoogleDriveLink = () => {
-    setGoogleDriveLinks((prev) => [...prev, ""]);
-  };
-
-  const handleAddWebsiteUrl = () => {
-    setWebsiteUrls((prev) => [...prev, ""]);
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     saveClientMutation.mutate();
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
   return (
-    <div className="container">
-      <h1>{id ? "Edit Client" : "Add Client"}</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Client Name</label>
-          <input
-            type="text"
-            value={clientName}
-            onChange={(e) => setClientName(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Full Name</label>
-          <input
-            type="text"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Company</label>
-          <input
-            type="text"
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Website</label>
-          <input
-            type="text"
-            value={website}
-            onChange={(e) => setWebsite(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Agent Name</label>
-          <input
-            type="text"
-            value={agentName}
-            onChange={(e) => setAgentName(e.target.value)}
-          />
-        </div>
-        <div>
-          <label>Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
+    <div className="dashboard-container">
+      <div className="sidebar"> {/* Sidebar for consistency with dashboard */} </div>
 
-        <div>
-          <label>Google Drive Links</label>
-          <button type="button" onClick={handleAddGoogleDriveLink}>
-            Add Google Drive Link
-          </button>
-          {googleDriveLinks.map((link, index) => (
-            <input
-              key={index}
-              type="text"
-              value={link}
-              onChange={(e) =>
-                setGoogleDriveLinks((prev) =>
-                  prev.map((l, i) => (i === index ? e.target.value : l))
-                )
-              }
-            />
-          ))}
-        </div>
+      <div className="main-content">
+        <h1 className="page-title">Edit Client</h1>
 
-        <div>
-          <label>Website URLs</label>
-          <button type="button" onClick={handleAddWebsiteUrl}>
-            Add Website URL
-          </button>
-          {websiteUrls.map((url, index) => (
-            <input
-              key={index}
-              type="text"
-              value={url}
-              onChange={(e) =>
-                setWebsiteUrls((prev) =>
-                  prev.map((u, i) => (i === index ? e.target.value : u))
-                )
-              }
-            />
-          ))}
-        </div>
+        <Card className="form-card">
+          <CardHeader>
+            <h2>Edit Client Information</h2>
+          </CardHeader>
 
-        <div className="actions">
-          <Button type="submit">
-            {id ? "Update Client" : "Add Client"}
-          </Button>
-          {id && (
-            <Button
-              type="button"
-              onClick={handleDelete}
-              variant="destructive"
-            >
-              Delete Client
-            </Button>
-          )}
-        </div>
-      </form>
+          <CardBody>
+            <Form onSubmit={handleSubmit} className="client-form">
+              {/* Name */}
+              <FormItem>
+                <FormLabel>Client Name</FormLabel>
+                <Input
+                  type="text"
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                  placeholder="Enter client name"
+                  required
+                />
+              </FormItem>
+
+              {/* Full Name */}
+              <FormItem>
+                <FormLabel>Full Name</FormLabel>
+                <Input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Enter full name"
+                />
+              </FormItem>
+
+              {/* Email */}
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter email"
+                />
+              </FormItem>
+
+              {/* Company */}
+              <FormItem>
+                <FormLabel>Company</FormLabel>
+                <Input
+                  type="text"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  placeholder="Enter company"
+                />
+              </FormItem>
+
+              {/* Website */}
+              <FormItem>
+                <FormLabel>Website</FormLabel>
+                <Input
+                  type="url"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  placeholder="Enter website"
+                />
+              </FormItem>
+
+              {/* Agent Name */}
+              <FormItem>
+                <FormLabel>Agent Name</FormLabel>
+                <Input
+                  type="text"
+                  value={agentName}
+                  onChange={(e) => setAgentName(e.target.value)}
+                  placeholder="Enter AI agent name"
+                />
+              </FormItem>
+
+              {/* Description */}
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <Textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Enter description"
+                />
+              </FormItem>
+
+              <div className="form-actions">
+                <Button type="submit" className="save-btn">Save Changes</Button>
+                <Button type="button" className="cancel-btn" onClick={() => navigate("/clients")}>Cancel</Button>
+              </div>
+            </Form>
+          </CardBody>
+        </Card>
+      </div>
     </div>
   );
 };
