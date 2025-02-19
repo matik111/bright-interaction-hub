@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, User, Mail, Building, Globe } from "lucide-react";
+import { ArrowLeft, User, Mail, Building, Globe, Bot } from "lucide-react"; // Bot import added
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,7 +23,7 @@ export default function AddClient() {
   });
 
   const addClientMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
+    mutationFn: async (data) => { // Type removed for simplicity, add back if needed
       const { data: client, error } = await supabase
         .from("clients")
         .insert([data])
@@ -51,14 +51,13 @@ export default function AddClient() {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => { // Type removed for simplicity, add back if needed
     e.preventDefault();
     addClientMutation.mutate(formData);
   };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
-      {/* Back Button */}
       <Button
         variant="ghost"
         className="mb-6"
@@ -67,12 +66,9 @@ export default function AddClient() {
         <ArrowLeft className="mr-2 h-4 w-4" /> Back to Clients
       </Button>
 
-      {/* Page Title */}
       <h1 className="text-3xl font-bold mb-8">Add New Client</h1>
 
-      {/* Form */}
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-lg space-y-6">
-        {/* Full Name */}
         <div>
           <label className="text-sm font-medium leading-none">Full Name</label>
           <div className="relative">
@@ -82,15 +78,12 @@ export default function AddClient() {
               className="pl-10"
               placeholder="John Doe"
               value={formData.name}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, name: e.target.value }))
-              }
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })} // Simplified
             />
           </div>
         </div>
 
-        {/* Email */}
-        <div>
+        <div> {/* Email */}
           <label className="text-sm font-medium leading-none">Email</label>
           <div className="relative">
             <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -100,15 +93,12 @@ export default function AddClient() {
               className="pl-10"
               placeholder="john@example.com"
               value={formData.email}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, email: e.target.value }))
-              }
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })} // Simplified
             />
           </div>
         </div>
 
-        {/* Company */}
-        <div>
+        <div> {/* Company */}
           <label className="text-sm font-medium leading-none">Company</label>
           <div className="relative">
             <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -116,15 +106,12 @@ export default function AddClient() {
               className="pl-10"
               placeholder="Company Name"
               value={formData.company}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, company: e.target.value }))
-              }
+              onChange={(e) => setFormData({ ...formData, company: e.target.value })} // Simplified
             />
           </div>
         </div>
 
-        {/* Website */}
-        <div>
+        <div> {/* Website */}
           <label className="text-sm font-medium leading-none">Website</label>
           <div className="relative">
             <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -133,44 +120,35 @@ export default function AddClient() {
               className="pl-10"
               placeholder="https://example.com"
               value={formData.website}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, website: e.target.value }))
-              }
+              onChange={(e) => setFormData({ ...formData, website: e.target.value })} // Simplified
             />
           </div>
         </div>
 
-        {/* AI Agent Name */}
-        <div>
+        <div> {/* AI Agent Name */}
           <label className="text-sm font-medium leading-none">AI Agent Name</label>
           <div className="relative">
-            <Bot className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Bot className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /> {/* Bot icon */}
             <Input
               required
               className="pl-10"
               placeholder="AI Chatbot"
               value={formData.agent_name}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, agent_name: e.target.value }))
-              }
+              onChange={(e) => setFormData({ ...formData, agent_name: e.target.value })} // Simplified
             />
           </div>
         </div>
 
-        {/* Description */}
-        <div>
+        <div> {/* Description */}
           <label className="text-sm font-medium leading-none">Description</label>
           <Textarea
             className="resize-none"
             placeholder="Add a brief description"
             value={formData.description}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, description: e.target.value }))
-            }
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })} // Simplified
           />
         </div>
 
-        {/* Submit Button */}
         <Button type="submit" className="w-full mt-6">Add Client</Button>
       </form>
     </div>
