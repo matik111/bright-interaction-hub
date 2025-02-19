@@ -23,7 +23,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
-    </QueryClientProvider> {/* Close QueryClientProvider here */}
+    </QueryClientProvider> // Fix: Removed comment within JSX
   );
 }
 
