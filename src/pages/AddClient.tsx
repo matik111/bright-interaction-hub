@@ -12,7 +12,7 @@ export default function AddClient() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -70,7 +70,7 @@ export default function AddClient() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
-          {/* Form Fields */}
+          {/* Full Name Field */}
           <div>
             <label className="text-sm font-medium leading-none">Full Name</label>
             <div className="relative">
@@ -87,6 +87,7 @@ export default function AddClient() {
             </div>
           </div>
 
+          {/* Email Field */}
           <div>
             <label className="text-sm font-medium leading-none">Email</label>
             <div className="relative">
@@ -104,8 +105,71 @@ export default function AddClient() {
             </div>
           </div>
 
-          {/* Repeat for other fields like Company, Website, AI Agent Name, etc. */}
+          {/* Company Field */}
+          <div>
+            <label className="text-sm font-medium leading-none">Company</label>
+            <div className="relative">
+              <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                className="pl-10"
+                placeholder="Company Name"
+                value={formData.company}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, company: e.target.value }))
+                }
+              />
+            </div>
+          </div>
 
+          {/* Website Field */}
+          <div>
+            <label className="text-sm font-medium leading-none">Website</label>
+            <div className="relative">
+              <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="url"
+                className="pl-10"
+                placeholder="https://example.com"
+                value={formData.website}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, website: e.target.value }))
+                }
+              />
+            </div>
+          </div>
+
+          {/* AI Agent Name Field */}
+          <div>
+            <label className="text-sm font-medium leading-none">AI Agent Name</label>
+            <div className="relative">
+              <Bot className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                required
+                className="pl-10"
+                placeholder="Assistant Name"
+                value={formData.agent_name}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, agent_name: e.target.value }))
+                }
+              />
+            </div>
+          </div>
+
+          {/* Description Field */}
+          <div>
+            <label className="text-sm font-medium leading-none">Description</label>
+            <div className="relative">
+              <FileText className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Textarea
+                className="min-h-[100px] pl-10"
+                placeholder="Additional details about the client..."
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, description: e.target.value }))
+                }
+              />
+            </div>
+          </div>
         </div>
 
         <div className="flex justify-end gap-4">
