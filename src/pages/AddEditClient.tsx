@@ -9,13 +9,18 @@ const AddEditClient = () => {
   const navigate = useNavigate();
 
   const [clientName, setClientName] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [company, setCompany] = useState("");
+  const [website, setWebsite] = useState("");
   const [agentName, setAgentName] = useState("");
+  const [description, setDescription] = useState("");
   const [googleDriveLinks, setGoogleDriveLinks] = useState<string[]>([]);
   const [websiteUrls, setWebsiteUrls] = useState<string[]>([]);
 
   // Fetch client data if editing
   const { data: client, isLoading } = useQuery({
-    queryKey: ['client', id],  // Use an array for queryKey
+    queryKey: ['client', id],
     queryFn: async () => {
       if (id) {
         const { data, error } = await supabase.from("clients").select("*").eq("id", id).single();
@@ -23,10 +28,15 @@ const AddEditClient = () => {
         return data;
       }
     },
-    enabled: !!id,  // Only fetch when there's an id
+    enabled: !!id,
     onSuccess: (data) => {
       setClientName(data.name);
-      setAgentName(data.agent_name);
+      setFullName(data.full_name || "");
+      setEmail(data.email || "");
+      setCompany(data.company || "");
+      setWebsite(data.website || "");
+      setAgentName(data.agent_name || "");
+      setDescription(data.description || "");
       setGoogleDriveLinks(data.google_drive_links || []);
       setWebsiteUrls(data.website_urls || []);
     },
@@ -37,11 +47,15 @@ const AddEditClient = () => {
     mutationFn: async () => {
       const payload = {
         name: clientName,
-        agent_name: agentName,
+        full_name: fullName,  // Saving Full Name
+        email: email,          // Saving Email
+        company: company,      // Saving Company
+        website: website,      // Saving Website
+        agent_name: agentName, // Saving AI Agent Name
+        description: description,  // Saving Description
         google_drive_links: googleDriveLinks,
         website_urls: websiteUrls,
-        updated_at: new Date().toISOString(),  // Update the updated_at timestamp
-        // created_at will automatically be set if it's a new entry
+        updated_at: new Date().toISOString(),
       };
       const { data, error } = await supabase.from("clients").upsert(payload);
       if (error) throw error;
@@ -95,6 +109,54 @@ const AddEditClient = () => {
           />
         </div>
 
+        {/* Full Name Field */}
+        <div className="mb-4">
+          <label htmlFor="fullName" className="block font-medium">Full Name</label>
+          <input
+            id="fullName"
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+        </div>
+
+        {/* Email Field */}
+        <div className="mb-4">
+          <label htmlFor="email" className="block font-medium">Email</label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+        </div>
+
+        {/* Company Field */}
+        <div className="mb-4">
+          <label htmlFor="company" className="block font-medium">Company</label>
+          <input
+            id="company"
+            type="text"
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+        </div>
+
+        {/* Website Field */}
+        <div className="mb-4">
+          <label htmlFor="website" className="block font-medium">Website</label>
+          <input
+            id="website"
+            type="text"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+        </div>
+
         {/* AI Agent Name Field */}
         <div className="mb-4">
           <label htmlFor="agentName" className="block font-medium">AI Agent Name</label>
@@ -103,6 +165,17 @@ const AddEditClient = () => {
             type="text"
             value={agentName}
             onChange={(e) => setAgentName(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded"
+          />
+        </div>
+
+        {/* Description Field */}
+        <div className="mb-4">
+          <label htmlFor="description" className="block font-medium">Description</label>
+          <textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded"
           />
         </div>
@@ -131,7 +204,13 @@ const AddEditClient = () => {
               </button>
             </div>
           ))}
-          <Button onClick={handleAddGoogleDriveLink}>Add Google Drive Link</Button>
+          <button
+            type="button"
+            onClick={handleAddGoogleDriveLink}
+            className="text-blue-500"
+          >
+            Add Google Drive Link
+          </button>
         </div>
 
         {/* Website URLs Section */}
@@ -158,13 +237,19 @@ const AddEditClient = () => {
               </button>
             </div>
           ))}
-          <Button onClick={handleAddWebsiteUrl}>Add Website URL</Button>
+          <button
+            type="button"
+            onClick={handleAddWebsiteUrl}
+            className="text-blue-500"
+          >
+            Add Website URL
+          </button>
         </div>
 
         {/* Save and Cancel Buttons */}
-        <div className="flex justify-end gap-4">
+        <div className="flex gap-4">
           <Button onClick={handleSave}>Save</Button>
-          <Button onClick={handleCancel} variant="outline">Cancel</Button>
+          <Button onClick={handleCancel}>Cancel</Button>
         </div>
       </form>
     </div>
